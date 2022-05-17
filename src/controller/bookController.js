@@ -119,7 +119,7 @@ const getBooks = async function (req, res) {
             // return all books that are not deleted and sort them in ascending
             let books = await bookModel.find({ isDeleted: false }).sort({ "title": 1 })
             if (!books) {
-                return res.status(404).send({status:false, msg:"no books present"})
+                return res.status(404).send({ status: false, msg: "no books present" })
             }
             return res.status(200).send({ status: true, msg: 'all book list', data: books })
 
@@ -136,7 +136,7 @@ const getBooks = async function (req, res) {
             return res.status(200).send({ status: true, count: book.length, message: 'Books list', data: book })
         }
         else {
-            return res.status(404).send({status:false, msg: "books not found" })
+            return res.status(404).send({ status: false, msg: "books not found" })
         }
 
     } catch (err) {
@@ -164,7 +164,7 @@ const getBooksById = async function (req, res) {
         }
 
         const reviews = await reviewModel.find({ bookId: bookId, isDeleted: false }); //finding the bookId in review Model
-        const finalBookDetails = {bookDetails, reviewsData: reviews, }; //Storing data into new Object
+        const finalBookDetails = { bookDetails, reviewsData: reviews, }; //Storing data into new Object
         return res.status(200).send({ status: true, msg: "Books list.", data: finalBookDetails });
 
     } catch (err) {
@@ -266,7 +266,7 @@ const deleteBookId = async function (req, res) {
         }
         // set the isDeleted true of that book with deleted date
         await bookModel.findOneAndUpdate({ _id: bookId }, { $set: { isDeleted: true, deletedAt: new Date() } })
-        await reviewModel.updateMany({bookId:bookId},{$set:{isDeleted:true}})
+        await reviewModel.updateMany({ bookId: bookId }, { $set: { isDeleted: true } })
         return res.status(200).send({ status: true, message: `Success` })
     }
     catch (error) {
