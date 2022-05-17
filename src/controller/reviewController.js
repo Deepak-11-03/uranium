@@ -149,13 +149,13 @@ const deleteReviewById = async function (req, res) {
         // find the book with book and check that is not deleted
         const book = await bookModel.findOne({ _id: bookId, isDeleted: false })
         if (!book) {
-            return res.status(400).send({ status: false, msg: 'book does not found' })
+            return res.status(404).send({ status: false, msg: 'book does not found' })
         }
 
         // find the book with book and check that is not deleted
         const review = await reviewModel.findOne({ _id: reviewId, bookId:bookId, isDeleted: false })
         if (!review) {
-            return res.status(400).send({ status: false, msg: 'review does not exist for given bookId' })
+            return res.status(404).send({ status: false, msg: 'review does not exist for given bookId' })
         }
 
         // set the isDeleted property of review to true 
