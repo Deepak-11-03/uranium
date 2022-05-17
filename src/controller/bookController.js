@@ -104,7 +104,7 @@ const createBook = async function (req, res) {
         return res.status(201).send({ status: true, message: `Books created successfully`, data: newBook });
     }
     catch (err) {
-        return res.status(500).json({ success: false, error: err.message, msg: "server" });
+        return res.status(500).json({ success: false, error: err.message });
     }
 }
 
@@ -118,6 +118,9 @@ const getBooks = async function (req, res) {
         if (!isValidRequestBody(queryParams)) {
             // return all books that are not deleted and sort them in ascending
             let books = await bookModel.find({ isDeleted: false }).sort({ "title": 1 })
+            if (!books) {
+                return res.status(404).send({status:false, msg:"no books present"})
+            }
             return res.status(200).send({ status: true, msg: 'all book list', data: books })
 
         }
@@ -133,11 +136,11 @@ const getBooks = async function (req, res) {
             return res.status(200).send({ status: true, count: book.length, message: 'Books list', data: book })
         }
         else {
-            return res.status(404).send({ msg: "books not found" })
+            return res.status(404).send({status:false, msg: "books not found" })
         }
 
     } catch (err) {
-        return res.status(500).send({ status: true, error: err.message })
+        return res.status(500).send({ status: false, error: err.message })
     }
 }
 
@@ -157,7 +160,7 @@ const getBooksById = async function (req, res) {
         const bookDetails = await bookModel.findOne({ _id: bookId, isDeleted: false, });
         //If no Books found in bookModel
         if (!bookDetails) {
-            return res.status(404).send({ status: true, msg: "No books found." });
+            return res.status(404).send({ status: false, msg: "No books found." });
         }
 
         const reviews = await reviewModel.find({ bookId: bookId, isDeleted: false }); //finding the bookId in review Model
@@ -259,11 +262,11 @@ const deleteBookId = async function (req, res) {
 
         let userId = req.userId    //by auth.js(decodede token userId)
         if (book.userId != userId) {
-            return res.status(401).send({ status: false, message: "Unauthorized access! Owner info doesn't match" });
+            return res.status(403).send({ status: false, message: "Unauthorized access! Owner info doesn't match" });
         }
         // set the isDeleted true of that book with deleted date
         await bookModel.findOneAndUpdate({ _id: bookId }, { $set: { isDeleted: true, deletedAt: new Date() } })
-        await reviewModel.findByIdAndUpdate({bookId:bookId},{$set:{isDeleted:true}})
+        await reviewModel.updateMany({bookId:bookId},{$set:{isDeleted:true}})
         return res.status(200).send({ status: true, message: `Success` })
     }
     catch (error) {
